@@ -1,4 +1,6 @@
 from bottle import route, run, template
+import sqlite3
+connection = sqlite3.connect("pets.db")
 
 # @route('/hello/<name>')
 # def index(name):
@@ -6,7 +8,7 @@ from bottle import route, run, template
 
 @route("/")
 def get_index():
-    return template("<b>Hello, there {{name}}!!!</b>", name="index")
+    return template("<b>Yo, there {{name}}!!!</b>", name="index")
 
 pets = [
     {'id':1, "name":"Dorothy", "kind":"dog"},
@@ -20,7 +22,11 @@ def get_hello(name):
     return template("hello.tpl", name=name)
 
 @route("/pets")
-def get_hello():
-    return template("pets.tpl", pets=pets)
+def get_pets():
+    cursor = connection.cursor()
+    result = cursor.execute("select * from pet")
+    data = result.fetchall()
+    names = [item[0] for item in list(cursor.description)]
+    return template("pets.tpl", names=names, data=data)
 
 run(host='localhost', port=8080)
