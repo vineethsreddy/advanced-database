@@ -36,10 +36,11 @@ def get_update(id):
     return template("update_item.tpl", item=rows[0])
 
 @post("/update")
-def post_add():
+def post_update():
     description = request.forms.get("description")
+    id = request.forms.get("id")
     cursor = connection.cursor()
-    cursor.execute(f"insert into list(description) values ('{description}')")
+    cursor.execute(f"update list set description='{description}' where id={id}")
     connection.commit()
     redirect("/list")    
 
