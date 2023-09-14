@@ -35,5 +35,24 @@ def get_delete(id):
     connection.commit()
     redirect("/list")
 
+@route("/update/<id>")
+def get_update(id):
+    cursor = connection.cursor()
+    rows = cursor.execute(f"select id, description from item where id={id}")
+    rows = list(rows)
+    if len(rows) != 1:
+        redirect("/list")
+    rows = [ {'id':row[0], 'description':row[1]} for row in rows ]
+    description = rows[0]['description']
+    return template("update_item.tpl", id=id, description=description)
+
+@post("/update")
+def post_update():
+    description = request.forms.get("description")
+    id = request.forms.get("id")
+    cursor = connection.cursor()
+    cursor.execute(f"update item set description='{description}' where id={id}")
+    connection.commit()
+    redirect("/list")
 
 run(host='localhost', port=8080)
