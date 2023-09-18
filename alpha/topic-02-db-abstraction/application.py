@@ -1,10 +1,6 @@
 from bottle import route, post, run, template, redirect, request
 import database
 
-import sqlite3
-
-connection = sqlite3.connect("shopping-list.db")
-
 @route("/")
 def get_index():
     redirect("/list")
@@ -40,9 +36,7 @@ def post_update():
 
 @route("/delete/<id>")
 def get_delete(id):
-    cursor = connection.cursor()
-    cursor.execute(f"delete from list where id={id}")
-    connection.commit()
+    database.delete_item(id)
     redirect("/list")
 
 

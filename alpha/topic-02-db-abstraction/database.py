@@ -18,12 +18,16 @@ def add_item(description):
     connection.commit()
 
 def update_item(id, description):
-    print("update item = ",[id, description])
     cursor = connection.cursor()
     statement = f"update list set description='{description}' where id={id}"
-    print("update statement = ",[statement])
     cursor.execute(statement)
     connection.commit()
+
+def delete_item(id):
+    cursor = connection.cursor()
+    cursor.execute(f"delete from list where id={id}")
+    connection.commit()
+
 
 def set_up_database():
     cursor = connection.cursor()
@@ -85,9 +89,22 @@ def test_update_item():
     items = get_items()
     assert items[2]['description'] == "chocolate"
 
+def test_delete_item():
+    print("testing delete_item()")
+    set_up_database()
+    add_item("mango")
+    items = get_items()
+    for item in items:
+        if item['description'] == 'mango':
+            delete_item(item['id'])
+    items = get_items()
+    for item in items:
+        assert item['description'] != 'mango'
+
 if __name__ == "__main__":
     test_set_up_database()
     test_get_items()
     test_add_item()
     test_update_item()
+    test_delete_item()
     print("done.")
