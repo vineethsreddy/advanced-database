@@ -1,46 +1,55 @@
-import dataset
+from peewee import *
 
-db = dataset.connect('sqlite:///mydatabase.db')
+db = SqliteDatabase('shopping-list.db')
+db.connect()
 
-def get_items(id=None):
-    list_table = db["list"]
-    if id == None:
-        rows = list_table.find()
-    else:
-        rows = list_table.find(id=id)
-    rows = [dict(row) for row in rows]
-    return rows
-
-def add_item(description):
-    list_table = db["list"]
-    list_table.insert({"description":description})
-
-def update_item(id, description):
-    list_table = db["list"]
-    list_table.update({
-        "id":id,
-        "description":description
-        }, ['id'])
-
-def delete_item(id):
-    list_table = db["list"]
-    list_table.delete(id=id)
+class Item(Model):
+    description = CharField()
+    class Meta:
+        database = db # This model uses the "people.db" database.
 
 def set_up_database():
-    try:
-        db["list"].drop()
-    except:
-        pass
-    list_table = db["list"]
-    for item in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
-        list_table.insert({"description":item})
+    db.drop_tables([Item], safe=True)
+    db.create_tables([Item])
+    for description in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
+        add_item(description)
+
+def get_items(id=None):
+    if id==None:
+        items = Item.select()
+    else:
+        items = Item.select().where(Item.id == id)
+    items = [
+        {
+            'id':item.id,
+            'description':item.description
+        }
+        for item in items
+    ]
+    return items
+
+def add_item(description):
+    item = Item(description=description)
+    item.save()
+
+def update_item(id, description):
+    item = Item.select().where(Item.id == id).get()
+    item.description = description
+    item.save()
+
+def delete_item(id):
+    #Item.delete().where(Item.id == id).execute()
+    item = Item.select().where(Item.id == id).get()
+    item.delete_instance()
+
 
 def test_set_up_database():
     print("testing set_up_database()")
     set_up_database()
-    list_table = db["list"]
-    items = list(list_table.find())
+    items = get_items()
     assert len(items) == 5
+    for item in items:
+        assert type(item) is dict
     descriptions = [item['description'] for item in items]
     for description in ['apples', 'broccoli', 'pizza', 'tangerine', 'potatoes']:
         assert description in descriptions
