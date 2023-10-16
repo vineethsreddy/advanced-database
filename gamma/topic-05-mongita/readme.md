@@ -147,7 +147,7 @@ def test_get_items():
         assert 'description' in item
         assert type(item['description']) is str
 
-...
+```
 
 Once we get the returned list, we can get an ID from that list, and use it to test ID-based queries. 
 
@@ -261,7 +261,7 @@ def test_add_item():
     items_collection.insert_one({"description":description})
 ```
 
-Here's the test for 'delete_item':
+Here's the test for `delete_item`:
 
 ```
 def test_delete_item():
